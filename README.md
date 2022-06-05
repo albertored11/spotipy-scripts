@@ -72,7 +72,11 @@ song per line, with the list of artists sepparated with commas and the name of t
 
 This is the first script I wrote as I started tinkering with spotipy, and it probably doesn't have much practical use.
 
-There is a `playlist_id` hardcoded variable that has to be set to the ID of the playlist.
+The playlist ID is read from the first program argument:
+
+```bash
+python scripts/get_playlist_tracks.py <playlist_id>
+```
 
 Example output:
 

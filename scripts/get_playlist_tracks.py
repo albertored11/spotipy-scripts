@@ -1,15 +1,17 @@
 # Script that prints all tracks from a Spotify playlist
 # Requires: spotipy
+# Usage: python create_playlist_mix.py <playlist_id>
 # Set SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET environment variables
 
 import spotipy
+import sys
 from spotipy.oauth2 import SpotifyClientCredentials
 
 # Set up auth using Client Credentials Flow
 auth_manager = SpotifyClientCredentials()
 sp = spotipy.Spotify(auth_manager=auth_manager)
 
-playlist_id = ""  # Replace with playlist ID
+playlist_id = sys.argv[1]
 
 playlist = sp.playlist(playlist_id)  # Load playlist info
 items = sp.playlist_items(playlist_id, limit=100)['items']  # Request first 100 items
