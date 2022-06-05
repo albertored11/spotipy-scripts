@@ -7,6 +7,8 @@
 import spotipy
 import random
 import time
+import json
+import sys
 from spotipy.oauth2 import SpotifyOAuth
 
 # Define needed scopes:
@@ -19,32 +21,19 @@ scope = "playlist-read-collaborative playlist-read-private playlist-modify-priva
 # Set up auth using Authorization Code Flow
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
-user = ""  # Replace with user ID (username)
-
-# Define playlist IDs as variables
-playlist_temporada_id = ""
-playlist_temporada_plus_id = ""
-
 # Name of the new playlist
 new_playlist_name = "Shuffle mix — " + time.strftime("%d/%m/%y")
 
-# List of dictionaries to define playlists:
-# * playlist_id (string): ID of the playlist ("saved" for saved tracks)
-# * count (int): number of tracks to add from the playlist
-playlists = [
-    {
-        "playlist_id": "saved",
-        "count": 50
-    },
-    {
-        "playlist_id": playlist_temporada_id,
-        "count": 20
-    },
-    {
-        "playlist_id": playlist_temporada_plus_id,
-        "count": 30
-    }
-]
+# Load data from JSON file. Format:
+# * user (string): user ID (username)
+# * playlists (list of object): list of playlists
+#   * playlist_id (string): ID of the playlist ("saved" for saved tracks)
+#   * count (number): number of tracks to add from the playlist
+with open(sys.argv[1], 'r') as f:
+    data = json.load(f)
+
+user = data['user']
+playlists = data['playlists']
 
 # Create the new playlist and store its ID in a variable
 new_playlist_id = sp.user_playlist_create(user, new_playlist_name, public=False)['id']

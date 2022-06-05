@@ -1,0 +1,17 @@
+{
+    "user": "",
+    "playlists": [
+        {
+            "playlist_id": "saved",
+            "count": 40
+        },
+        {
+            "playlist_id": "",
+            "count": 25
+        },
+        {
+            "playlist_id": "",
+            "count": 35
+        }
+    ]
+}
