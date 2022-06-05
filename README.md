@@ -51,10 +51,7 @@ export SPOTIPY_REDIRECT_URI="http://localhost:9090" # replace with the redirect 
 
 ### Run a script
 
-Some scripts have hardcoded variables that must be set. Review the code of the script you want to run and set them
-accordingly.
-
-Then run the script:
+To run the script:
 
 ```bash
 python scripts/<script_name>.py
