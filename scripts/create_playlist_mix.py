@@ -26,10 +26,11 @@ scope = "playlist-read-collaborative playlist-read-private playlist-modify-priva
 # Set up auth using Authorization Code Flow
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
-# Name of the new playlist
+# Default name of the new playlist
 new_playlist_name = "Shuffle mix — " + time.strftime("%d/%m/%y")
 
 # Load data from JSON file. Format:
+# * new_playlist_name (string): name of the new playlist (leave blank for default)
 # * user (string): user ID (username)
 # * playlists (list of object): list of playlists
 #   * playlist_id (string): ID of the playlist ("saved" for saved tracks)
@@ -37,6 +38,8 @@ new_playlist_name = "Shuffle mix — " + time.strftime("%d/%m/%y")
 with open(sys.argv[1], 'r') as f:
     data = json.load(f)
 
+if data['new_playlist_name'] != "":
+    new_playlist_name = data['new_playlist_name']
 user = data['user']
 playlists = data['playlists']
 

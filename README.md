@@ -95,4 +95,15 @@ Jax Jones, Martin Solveig, GRACEY, Europa — Lonely Heart
 
 ### [create_playlist_mix](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/create_playlist_mix.py)
 
-(TODO)
+This script creates a Spotify playlist with random tracks from other playlists.
+
+This is the main reason I stared tinkering with the Spotify API. In my Spotify account, I have playlists with recently
+released music, and sometimes I like to shuffle those playlists when I don't want to think about what exact songs I want
+to listen to. Other times, I prefer to shuffle all my liked songs, which not only include recent music, but also songs
+from several years ago. And sometimes I want a mix of these two: a bunch of recent songs, and some good oldies.
+
+Before writing this script, I manually created playlists which I call "Shuffle mixes". I shuffled a couple of playlists
+with recent music, I took a number of songs from them, and then I did the same with my liked songs. That used to take me
+some time, so I decided to automate the process, and the result is this script!
+
+
