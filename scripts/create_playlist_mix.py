@@ -1,6 +1,7 @@
 # Script that creates a Spotify playlist with random tracks from other playlists
 # If there are duplicates in the resulting playlist, they are removed
 # Requires: spotipy
+# Usage: python create_playlist_mix.py data.json
 # Set SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET environment variables
 # Set SPOTIPY_REDIRECT_URI environment variable (e. g. to http://localhost:9090)
 
