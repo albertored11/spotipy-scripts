@@ -12,6 +12,10 @@ import json
 import sys
 from spotipy.oauth2 import SpotifyOAuth
 
+if len(sys.argv) < 2:
+    print("Usage: python create_playlist_mix.py data.json", file=sys.stderr)
+    exit(1)
+
 # Define needed scopes:
 # * playlist-read-collaborative: to get tracks from collab playlists
 # * playlist-read-private: to get tracks from private playlists
