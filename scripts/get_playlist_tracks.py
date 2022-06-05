@@ -7,11 +7,15 @@ import spotipy
 import sys
 from spotipy.oauth2 import SpotifyClientCredentials
 
+if len(sys.argv) < 2:
+    print("Usage: python create_playlist_mix.py <playlist_id>", file=sys.stderr)
+    exit(1)
+
 # Set up auth using Client Credentials Flow
 auth_manager = SpotifyClientCredentials()
 sp = spotipy.Spotify(auth_manager=auth_manager)
 
-playlist_id = sys.argv[1]
+playlist_id = sys.argv[1]  # Read playlist ID from first program argument
 
 playlist = sp.playlist(playlist_id)  # Load playlist info
 items = sp.playlist_items(playlist_id, limit=100)['items']  # Request first 100 items
