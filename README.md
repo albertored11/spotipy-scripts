@@ -102,8 +102,44 @@ released music, and sometimes I like to shuffle those playlists when I don't wan
 to listen to. Other times, I prefer to shuffle all my liked songs, which not only include recent music, but also songs
 from several years ago. And sometimes I want a mix of these two: a bunch of recent songs, and some good oldies.
 
-Before writing this script, I manually created playlists which I call "Shuffle mixes". I shuffled a couple of playlists
-with recent music, I took a number of songs from them, and then I did the same with my liked songs. That used to take me
-some time, so I decided to automate the process, and the result is this script!
+Before writing this script, I used to manually create playlists which I called "Shuffle mixes". I would shuffle a couple
+of playlists with recent music, I would take a number of songs from them, and then I would do the same with my liked
+songs. That used to take me some time, so I decided to automate the process, and the result is this script!
 
+The script takes one agrument: the path of a JSON file with the data of the playlists.
 
+Format of the data file:
+
+* **new_playlist_name (string):** name of the new playlist (leave blank for default: "Shuffle mix — <today's date>")
+* **user (string):** user ID (username)
+* **playlists (list of object):** list of playlists
+  * **playlist_id (string):** ID of the playlist ("saved" for saved tracks)
+  * **count (number):** number of tracks to add from the playlist
+
+Example data file:
+
+```json
+{
+    "new_playlist_name": "My cool mix",
+    "user": "myuser2227",
+    "playlists": [
+        {
+            "playlist_id": "saved",
+            "count": 40
+        },
+        {
+            "playlist_id": "xxxxxxxxxxxxxxxxxxxxxx",
+            "count": 25
+        },
+        {
+            "playlist_id": "yyyyyyyyyyyyyyyyyyyyyy",
+            "count": 35
+        }
+    ]
+}
+```
+
+Running the script with that data file would create a playlist named "My cool mix", which would contain 40 randomly
+chosen songs from myuser2227's liked songs, 25 randomly chosen songs from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx`
+and 35 randomly chosen songs from the playlist with ID `yyyyyyyyyyyyyyyyyyyyyy`, with the duplicates between playlists
+removed.
