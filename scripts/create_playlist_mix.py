@@ -87,5 +87,7 @@ for playlist in playlists:
 new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
 random.shuffle(new_playlist_song_ids)
 
-# Add tracks to the new playlist
-sp.playlist_add_items(new_playlist_id, new_playlist_song_ids)
+# Add tracks to the new playlist 100 by 100 due to the limit
+while len(new_playlist_song_ids) > 0:
+    sp.playlist_add_items(new_playlist_id, new_playlist_song_ids[:100])
+    new_playlist_song_ids = new_playlist_song_ids[100:]
