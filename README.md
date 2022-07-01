@@ -114,7 +114,7 @@ Format of the data file:
 * **user (string):** user ID (username)
 * **playlists (list of object):** list of playlists
   * **playlist_id (string):** ID of the playlist ("saved" for saved tracks)
-  * **count (number):** number of tracks to add from the playlist
+  * **count (number):** number of tracks to add from the playlist (if it is less than `0`, e.g. `-1`, add all tracks)
 
 Example data file:
 
@@ -143,3 +143,30 @@ Running the script with that data file would create a playlist named "My cool mi
 chosen songs from myuser2227's liked songs, 25 randomly chosen songs from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx`
 and 35 randomly chosen songs from the playlist with ID `yyyyyyyyyyyyyyyyyyyyyy`, with the duplicates between playlists
 removed.
+
+#### More use cases
+
+Another possible and simpler use case for this script could be shuffling a single playlist. This could be useful if you
+want to shuffle the songs of a playlist and save that new order in a different playlist.
+
+The advantage compared to using the shuffle mode is that this way the order is kept, so even if you leave the playlist
+unfinished listening, you can come back whenever you want and make sure you listen to every song in the playlist, but in
+a random order.
+
+Example data file for this use case:
+
+```json
+{
+    "new_playlist_name": "My shuffled playlist",
+    "user": "myuser2227",
+    "playlists": [
+        {
+            "playlist_id": "yyyyyyyyyyyyyyyyyyyyyy",
+            "count": -1
+        }
+    ]
+}
+```
+
+Running the script with that data file would create a playlist named "My shuffled playlist", which would contain every
+song from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx`, but in a random order.
