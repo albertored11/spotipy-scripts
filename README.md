@@ -111,6 +111,8 @@ The script takes one agrument: the path of a JSON file with the data of the play
 Format of the data file:
 
 * **new_playlist_name (string):** name of the new playlist (leave blank for default: "Shuffle mix — <today's date>")
+* **date_in_name (bool):** if true, append ` — <today's date>` at the end of the name of the playlist, with
+`<today's date>` the date of today in DD/MM/YY format.
 * **user (string):** user ID (username)
 * **playlists (list of object):** list of playlists
   * **playlist_id (string):** ID of the playlist ("saved" for saved tracks)
@@ -121,6 +123,7 @@ Example data file:
 ```json
 {
     "new_playlist_name": "My cool mix",
+    "date_in_name": false,
     "user": "myuser2227",
     "playlists": [
         {
