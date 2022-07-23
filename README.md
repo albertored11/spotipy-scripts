@@ -173,3 +173,30 @@ Example data file for this use case:
 
 Running the script with that data file would create a playlist named "My shuffled playlist", which would contain every
 song from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx`, but in a random order.
+
+### [copy_to_playlist](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/copy_to_playlist.py)
+
+This script takes the tracks from a playlist and appends them to the end of a different, existing playlist, avoiding
+duplicates.
+
+The reason I wrote this script is to run it every friday to make it copy the tracks from my Release Radar to a playlist
+where I keep a history of my Release Radars through the weeks. This way, even if one week I miss the Release Radar and
+I don't listen to all the tracks, I can get to keep it in a playlist that doesn't change its contents every week and
+listen to them later.
+
+The playlist IDs (source and destination) are read from the first and the second program arguments, respectively:
+
+```bash
+python scripts/get_playlist_tracks.py <source_playlist_id> <dest_playlist_id>
+```
+
+Running the script would append the tracks from the playlist with ID `<source_playlist_id>` to the end of the playlist
+with ID `<dest_playlist_id>`, excepting the ones that already existed in the latter.
+
+#### Automating weekly run
+
+In order to match my particular use case for this script, which I mentioned earlier, some automation is needed to run
+the script once a week.
+
+My choice is using a [systemd timer](https://wiki.archlinux.org/title/Systemd/Timers) to run the script every friday at
+12:00, but a cron job should also do the work.
