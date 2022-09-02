@@ -28,6 +28,10 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
 # Load data from JSON file. Format:
 # * new_playlist_name (string): name of the new playlist (leave blank for default)
+# * date_in_name (bool): if true, append — <today's date> at the end of the name of the playlist, with <today's date>
+#   the date of today in DD/MM/YY format.
+# * update_playlist (string): if null, a new playlist is created; else, use the playlist with this ID (all its tracks
+#   are removed first).
 # * user (string): user ID (username)
 # * playlists (list of object): list of playlists
 #   * playlist_id (string): ID of the playlist ("saved" for saved tracks)
@@ -36,16 +40,36 @@ with open(sys.argv[1], 'r') as f:
     data = json.load(f)
 
 new_playlist_name = data['new_playlist_name']
-
-# If date_in_name is true, append date at the end of the name of the playlist
-if data['date_in_name']:
-    new_playlist_name += " — " + time.strftime("%d/%m/%y")
-
 user = data['user']
 playlists = data['playlists']
+update_playlist = data['update_playlist']
 
-# Create the new playlist and store its ID in a variable
-new_playlist_id = sp.user_playlist_create(user, new_playlist_name, public=False)['id']
+existing_playlist_song_ids = []  # List for the songs of the existing playlist
+
+# If update_playlist is null, create the new playlist and store its ID in a variable, else store the existing playlist
+# ID and get all its tracks
+if update_playlist is None:
+    # If date_in_name is true, append date at the end of the name of the playlist
+    if data['date_in_name']:
+        new_playlist_name += " — " + time.strftime("%d/%m/%y")
+
+    new_playlist_id = sp.user_playlist_create(user, new_playlist_name, public=False)['id']
+else:
+    new_playlist_id = update_playlist
+
+    count = sp.playlist(new_playlist_id)['tracks']['total']  # Get number of songs
+    offset = 0  # Keep an offset bc requests have a 100 track limit
+
+    items = sp.playlist_items(new_playlist_id, limit=100)['items']  # Max limit for playlists = 100
+
+    # Iterate while getting items from the request
+    while len(items) > 0:
+        for item in items:
+            existing_playlist_song_ids.append(item['track']['id'])  # Append the ID of the track
+
+        # Request next 100 items
+        offset += 100
+        items = sp.playlist_items(new_playlist_id, limit=100, offset=offset)['items']
 
 new_playlist_song_ids = []  # List for the songs of the new playlist
 
@@ -84,6 +108,12 @@ for playlist in playlists:
     # Shuffle tracks, take count and add them to the list of songs of the new playlist
     random.shuffle(song_ids)
     new_playlist_song_ids.extend(song_ids[:count])
+
+# If update_playlist is not null, remove all its tracks 100 by 100 due to the limit
+if update_playlist is not None:
+    while len(existing_playlist_song_ids) > 0:
+        sp.playlist_remove_all_occurrences_of_items(new_playlist_id, existing_playlist_song_ids[:100])
+        existing_playlist_song_ids = existing_playlist_song_ids[100:]
 
 # Remove duplicates from the list of songs and shuffle
 new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))

@@ -1,0 +1,16 @@
+{
+    "new_playlist_name": null,
+    "date_in_name": true,
+    "update_playlist": "",
+    "user": "",
+    "playlists": [
+        {
+            "playlist_id": "",
+            "count": 40
+        },
+        {
+            "playlist_id": "",
+            "count": 60
+        }
+    ]
+}

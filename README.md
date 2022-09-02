@@ -114,6 +114,8 @@ Format of the data file:
 * **date_in_name (bool):** if true, append ` — <today's date>` at the end of the name of the playlist, with
 `<today's date>` the date of today in DD/MM/YY format.
 * **user (string):** user ID (username)
+* **update_playlist (string):** if null, a new playlist is created; else, use the playlist with this ID (all its tracks are
+  removed first).
 * **playlists (list of object):** list of playlists
   * **playlist_id (string):** ID of the playlist ("saved" for saved tracks)
   * **count (number):** number of tracks to add from the playlist (if it is less than `0`, e.g. `-1`, add all tracks)
@@ -124,6 +126,7 @@ Example data file:
 {
     "new_playlist_name": "My cool mix",
     "date_in_name": false,
+    "update_playlist": null,
     "user": "myuser2227",
     "playlists": [
         {
@@ -146,6 +149,31 @@ Running the script with that data file would create a playlist named "My cool mi
 chosen songs from myuser2227's liked songs, 25 randomly chosen songs from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx`
 and 35 randomly chosen songs from the playlist with ID `yyyyyyyyyyyyyyyyyyyyyy`, with the duplicates between playlists
 removed.
+
+Another example data file:
+
+```json
+{
+    "new_playlist_name": null,
+    "date_in_name": true,
+    "update_playlist": "zzzzzzzzzzzzzzzzzzzzzz",
+    "user": "myuser2227",
+    "playlists": [
+        {
+            "playlist_id": "xxxxxxxxxxxxxxxxxxxxxx",
+            "count": 40
+        },
+        {
+            "playlist_id": "yyyyyyyyyyyyyyyyyyyyyy",
+            "count": 60
+        }
+    ]
+}
+```
+
+Running the script with that data file would replace all songs from the playlist with ID `zzzzzzzzzzzzzzzzzzzzzz` with
+40 randomly chosen songs from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx` and 60 randomly chosen songs from the
+playlist with ID `yyyyyyyyyyyyyyyyyyyyyy`, with the duplicates between playlists removed.
 
 #### More use cases
 
