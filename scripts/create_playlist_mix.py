@@ -54,6 +54,7 @@ for playlist in playlists:
     playlist_id = playlist['playlist_id']
     count = playlist['count']
 
+    # TODO: this does not work with saved songs
     # If count < 0, use all songs
     if count < 0:
         count = sp.playlist(playlist_id)['tracks']['total']  # Get number of songs
