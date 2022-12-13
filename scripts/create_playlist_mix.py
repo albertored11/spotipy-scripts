@@ -12,6 +12,38 @@ import json
 import sys
 from spotipy.oauth2 import SpotifyOAuth
 
+def get_tracks_from_playlist(sp, playlist_id, count):
+    # TODO: this does not work with saved songs
+    # If count < 0, use all songs
+    if count < 0:
+        count = sp.playlist(playlist_id)['tracks']['total']  # Get number of songs
+
+    offset = 0  # Keep an offset bc requests have a 50/100 track limit
+    song_ids = []  # List for the songs from each playlist
+
+    # If playlist_id is "saved", request saved tracks; otherwise, request tracks from the corresponding playlist
+    if playlist_id == "saved":
+        items = sp.current_user_saved_tracks(limit=50)['items']  # Max limit for saved tracks = 50
+    else:
+        items = sp.playlist_items(playlist_id, limit=100)['items']  # Max limit for playlists = 100
+
+    # Iterate while getting items from the request
+    while len(items) > 0:
+        for item in items:
+            song_ids.append(item['track']['id'])  # Append the ID of the track
+
+        # Request next 50/100 items
+        if playlist_id == "saved":
+            offset += 50
+            items = sp.current_user_saved_tracks(limit=50, offset=offset)['items']
+        else:
+            offset += 100
+            items = sp.playlist_items(playlist_id, limit=100, offset=offset)['items']
+
+    # Shuffle tracks, take count and add them to the list of songs of the new playlist
+    random.shuffle(song_ids)
+    return song_ids[:count]
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python create_playlist_mix.py data.json", file=sys.stderr)
@@ -78,36 +110,7 @@ def main():
         playlist_id = playlist['playlist_id']
         count = playlist['count']
 
-        # TODO: this does not work with saved songs
-        # If count < 0, use all songs
-        if count < 0:
-            count = sp.playlist(playlist_id)['tracks']['total']  # Get number of songs
-
-        offset = 0  # Keep an offset bc requests have a 50/100 track limit
-        song_ids = []  # List for the songs from each playlist
-
-        # If playlist_id is "saved", request saved tracks; otherwise, request tracks from the corresponding playlist
-        if playlist_id == "saved":
-            items = sp.current_user_saved_tracks(limit=50)['items']  # Max limit for saved tracks = 50
-        else:
-            items = sp.playlist_items(playlist_id, limit=100)['items']  # Max limit for playlists = 100
-
-        # Iterate while getting items from the request
-        while len(items) > 0:
-            for item in items:
-                song_ids.append(item['track']['id'])  # Append the ID of the track
-
-            # Request next 50/100 items
-            if playlist_id == "saved":
-                offset += 50
-                items = sp.current_user_saved_tracks(limit=50, offset=offset)['items']
-            else:
-                offset += 100
-                items = sp.playlist_items(playlist_id, limit=100, offset=offset)['items']
-
-        # Shuffle tracks, take count and add them to the list of songs of the new playlist
-        random.shuffle(song_ids)
-        new_playlist_song_ids.extend(song_ids[:count])
+        new_playlist_song_ids.extend(get_tracks_from_playlist(sp, playlist_id, count))
 
     # If update_playlist is not null, remove all its tracks 100 by 100 due to the limit
     if update_playlist is not None:
