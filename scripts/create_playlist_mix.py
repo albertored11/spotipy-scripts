@@ -19,7 +19,7 @@ def get_tracks_from_playlist(sp, playlist_id, count):
         count = sp.playlist(playlist_id)['tracks']['total']  # Get number of songs
 
     offset = 0  # Keep an offset bc requests have a 50/100 track limit
-    song_ids = []  # List for the songs from each playlist
+    song_ids = []  # List for the songs from the playlist
 
     # If playlist_id is "saved", request saved tracks; otherwise, request tracks from the corresponding playlist
     if playlist_id == "saved":
@@ -40,7 +40,7 @@ def get_tracks_from_playlist(sp, playlist_id, count):
             offset += 100
             items = sp.playlist_items(playlist_id, limit=100, offset=offset)['items']
 
-    # Shuffle tracks, take count and add them to the list of songs of the new playlist
+    # Shuffle tracks, take count and return them
     random.shuffle(song_ids)
     return song_ids[:count]
 
@@ -110,6 +110,7 @@ def main():
         playlist_id = playlist['playlist_id']
         count = playlist['count']
 
+        # Add shuffled tracks to the list of songs of the new playlist
         new_playlist_song_ids.extend(get_tracks_from_playlist(sp, playlist_id, count))
 
     # If update_playlist is not null, remove all its tracks 100 by 100 due to the limit
