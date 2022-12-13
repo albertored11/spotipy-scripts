@@ -57,7 +57,6 @@ if update_playlist is None:
 else:
     new_playlist_id = update_playlist
 
-    count = sp.playlist(new_playlist_id)['tracks']['total']  # Get number of songs
     offset = 0  # Keep an offset bc requests have a 100 track limit
 
     items = sp.playlist_items(new_playlist_id, limit=100)['items']  # Max limit for playlists = 100
