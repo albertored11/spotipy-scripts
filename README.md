@@ -114,8 +114,10 @@ Format of the data file:
 * **date_in_name (bool):** if true, append ` — <today's date>` at the end of the name of the playlist, with
 `<today's date>` the date of today in DD/MM/YY format.
 * **user (string):** user ID (username)
-* **update_playlist (string):** if null, a new playlist is created; else, use the playlist with this ID (all its tracks are
-  removed first).
+* **update_playlist (string):** if null, a new playlist is created; else, use the playlist with this ID (all its tracks
+  are removed first).
+* **filler_playlist_id (string):** if null, playlist will be left as is after removing duplicates; else, complete it
+  with tracks from the playlist with this ID.
 * **playlists (list of object):** list of playlists
   * **playlist_id (string):** ID of the playlist ("saved" for saved tracks)
   * **count (number):** number of tracks to add from the playlist (if it is less than `0`, e.g. `-1`, add all tracks)
