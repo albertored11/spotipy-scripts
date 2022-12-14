@@ -77,10 +77,10 @@ def main():
 
     # Load data from JSON file. Format:
     # * new_playlist_name (string): name of the new playlist (leave blank for default)
-    # * date_in_name (bool): if true, append — <today's date> at the end of the name of the playlist, with <today's date>
-    #   the date of today in DD/MM/YY format.
-    # * update_playlist (string): if null, a new playlist is created; else, use the playlist with this ID (all its tracks
-    #   are removed first).
+    # * date_in_name (bool): if true, append — <today's date> at the end of the name of the playlist, with
+    #   <today's date> the date of today in DD/MM/YY format.
+    # * update_playlist (string): if null, a new playlist is created; else, use the playlist with this ID (all its
+    #   tracks are removed first).
     # * user (string): user ID (username)
     # * playlists (list of object): list of playlists
     #   * playlist_id (string): ID of the playlist ("saved" for saved tracks)
@@ -96,8 +96,8 @@ def main():
 
     existing_playlist_song_ids = []  # List for the songs of the existing playlist
 
-    # If update_playlist is null, create the new playlist and store its ID in a variable, else store the existing playlist
-    # ID and get all its tracks
+    # If update_playlist is null, create the new playlist and store its ID in a variable, else store the existing
+    # playlist ID and get all its tracks
     if update_playlist is None:
         # If date_in_name is true, append date at the end of the name of the playlist
         if data['date_in_name']:
@@ -143,7 +143,8 @@ def main():
 
         # While the desired number of tracks has not been achieved and there are tracks remaining from filler playlist,
         # keep adding new ones
-        while len(new_playlist_song_ids) < total_count and not all(elem in new_playlist_song_ids for elem in filler_playlist_song_ids):
+        while len(new_playlist_song_ids) < total_count and \
+            not all(elem in new_playlist_song_ids for elem in filler_playlist_song_ids):
             # Number of tracks to take: difference between desired number and current number
             count = total_count - len(new_playlist_song_ids)
 
