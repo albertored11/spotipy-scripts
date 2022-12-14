@@ -12,11 +12,11 @@ import json
 import sys
 from spotipy.oauth2 import SpotifyOAuth
 
-def get_tracks_from_playlist(sp, playlist_id, count):
-    # TODO: this does not work with saved songs
-    # If count < 0, use all songs
-    if count < 0:
-        count = sp.playlist(playlist_id)['tracks']['total']  # Get number of songs
+def get_tracks_from_playlist(sp, playlist_id):
+    """
+    Given a spotipy Spotify instance and a playlist ID, returns a list containing the IDs of every track in that
+    playlist.
+    """
 
     offset = 0  # Keep an offset bc requests have a 50/100 track limit
     song_ids = []  # List for the songs from the playlist
@@ -39,6 +39,22 @@ def get_tracks_from_playlist(sp, playlist_id, count):
         else:
             offset += 100
             items = sp.playlist_items(playlist_id, limit=100, offset=offset)['items']
+
+    # Return list with all song IDs
+    return song_ids
+
+def get_random_tracks_from_playlist(sp, playlist_id, count):
+    """
+    Given a spotipy Spotify instance, a playlist ID and a number, returns a list containing that number of IDs of
+    randomly selected tracks from that playlist.
+    """
+
+    song_ids = get_tracks_from_playlist(sp, playlist_id)
+
+    # TODO: this does not work with saved songs
+    # If count < 0, use all songs
+    if count < 0:
+        count = sp.playlist(playlist_id)['tracks']['total']  # Get number of songs
 
     # Shuffle tracks, take count and return them
     random.shuffle(song_ids)
@@ -76,6 +92,7 @@ def main():
     user = data['user']
     playlists = data['playlists']
     update_playlist = data['update_playlist']
+    filler_playlist_id = data['filler_playlist_id']
 
     existing_playlist_song_ids = []  # List for the songs of the existing playlist
 
@@ -104,24 +121,44 @@ def main():
             items = sp.playlist_items(new_playlist_id, limit=100, offset=offset)['items']
 
     new_playlist_song_ids = []  # List for the songs of the new playlist
+    total_count = 0  # Eventually, number of songs that should be selected in total across all playlists
 
     # Iterate over the playlists
     for playlist in playlists:
         playlist_id = playlist['playlist_id']
         count = playlist['count']
 
+        total_count += count
+
         # Add shuffled tracks to the list of songs of the new playlist
-        new_playlist_song_ids.extend(get_tracks_from_playlist(sp, playlist_id, count))
+        new_playlist_song_ids.extend(get_random_tracks_from_playlist(sp, playlist_id, count))
+
+    # Remove duplicates from the list of songs
+    new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
+
+    # If a filler playlist ID is specified, add random tracks from it
+    if filler_playlist_id is not None:
+        # Get all tracks from the filler playlist
+        filler_playlist_song_ids = get_tracks_from_playlist(sp, filler_playlist_id)
+
+        # While the desired number of tracks has not been achieved and there are tracks remaining from filler playlist,
+        # keep adding new ones
+        while len(new_playlist_song_ids) < total_count and not all(elem in new_playlist_song_ids for elem in filler_playlist_song_ids):
+            # Number of tracks to take: difference between desired number and current number
+            count = total_count - len(new_playlist_song_ids)
+
+            # Add newly selected tracks and remove duplicates
+            new_playlist_song_ids.extend(get_random_tracks_from_playlist(sp, filler_playlist_id, count))
+            new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
+
+    # Shuffle list of songs
+    random.shuffle(new_playlist_song_ids)
 
     # If update_playlist is not null, remove all its tracks 100 by 100 due to the limit
     if update_playlist is not None:
         while len(existing_playlist_song_ids) > 0:
             sp.playlist_remove_all_occurrences_of_items(new_playlist_id, existing_playlist_song_ids[:100])
             existing_playlist_song_ids = existing_playlist_song_ids[100:]
-
-    # Remove duplicates from the list of songs and shuffle
-    new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
-    random.shuffle(new_playlist_song_ids)
 
     # Add tracks to the new playlist 100 by 100 due to the limit
     while len(new_playlist_song_ids) > 0:
