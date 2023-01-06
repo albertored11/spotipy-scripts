@@ -14,12 +14,11 @@ from spotipy.oauth2 import SpotifyOAuth
 
 def get_tracks_from_playlist(sp, playlist_id):
     """
-    Given a spotipy Spotify instance and a playlist ID, returns a list containing the IDs of every track in that
-    playlist.
+    Given a spotipy Spotify instance and a playlist ID, returns a list containing every track in that playlist.
     """
 
     offset = 0  # Keep an offset bc requests have a 50/100 track limit
-    song_ids = []  # List for the songs from the playlist
+    songs = []  # List for the songs from the playlist
 
     # If playlist_id is "saved", request saved tracks; otherwise, request tracks from the corresponding playlist
     if playlist_id == "saved":
@@ -30,7 +29,7 @@ def get_tracks_from_playlist(sp, playlist_id):
     # Iterate while getting items from the request
     while len(items) > 0:
         for item in items:
-            song_ids.append(item['track']['id'])  # Append the ID of the track
+            songs.append(item['track'])  # Append track
 
         # Request next 50/100 items
         if playlist_id == "saved":
@@ -40,8 +39,8 @@ def get_tracks_from_playlist(sp, playlist_id):
             offset += 100
             items = sp.playlist_items(playlist_id, limit=100, offset=offset)['items']
 
-    # Return list with all song IDs
-    return song_ids
+    # Return list with all songs
+    return songs
 
 def get_random_tracks_from_playlist(sp, playlist_id, count):
     """
@@ -49,7 +48,10 @@ def get_random_tracks_from_playlist(sp, playlist_id, count):
     randomly selected tracks from that playlist.
     """
 
-    song_ids = get_tracks_from_playlist(sp, playlist_id)
+    song_ids = []
+
+    for song in get_tracks_from_playlist(sp, playlist_id):
+        song_ids.append(song['id'])
 
     # TODO: this does not work with saved songs
     # If count < 0, use all songs
@@ -139,7 +141,10 @@ def main():
     # If a filler playlist ID is specified, add random tracks from it
     if filler_playlist_id is not None:
         # Get all tracks from the filler playlist
-        filler_playlist_song_ids = get_tracks_from_playlist(sp, filler_playlist_id)
+        filler_playlist_song_ids = []
+
+        for song in get_tracks_from_playlist(sp, filler_playlist_id):
+            filler_playlist_song_ids.append(song['id'])
 
         # While the desired number of tracks has not been achieved and there are tracks remaining from filler playlist,
         # keep adding new ones
