@@ -110,12 +110,12 @@ The script takes one agrument: the path of a JSON file with the data of the play
 
 Format of the data file:
 
-* **new_playlist_name (string):** name of the new playlist (leave blank for default: "Shuffle mix — <today's date>")
+* **new_playlist_name (string):** name of the new playlist; set to null if update_playlist is set
 * **date_in_name (bool):** if true, append ` — <today's date>` at the end of the name of the playlist, with
 `<today's date>` the date of today in DD/MM/YY format.
-* **user (string):** user ID (username)
 * **update_playlist (string):** if null, a new playlist is created; else, use the playlist with this ID (all its tracks
   are removed first).
+* **user (string):** user ID (username)
 * **filler_playlist_id (string):** if null, playlist will be left as is after removing duplicates; else, complete it
   with tracks from the playlist with this ID.
 * **playlists (list of object):** list of playlists
@@ -129,6 +129,7 @@ Example data file:
     "new_playlist_name": "My cool mix",
     "date_in_name": false,
     "update_playlist": null,
+    "filler_playlist_id": null,
     "user": "myuser2227",
     "playlists": [
         {
@@ -159,6 +160,7 @@ Another example data file:
     "new_playlist_name": null,
     "date_in_name": true,
     "update_playlist": "zzzzzzzzzzzzzzzzzzzzzz",
+    "filler_playlist_id": "xxxxxxxxxxxxxxxxxxxxxx",
     "user": "myuser2227",
     "playlists": [
         {
@@ -175,7 +177,8 @@ Another example data file:
 
 Running the script with that data file would replace all songs from the playlist with ID `zzzzzzzzzzzzzzzzzzzzzz` with
 40 randomly chosen songs from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx` and 60 randomly chosen songs from the
-playlist with ID `yyyyyyyyyyyyyyyyyyyyyy`, with the duplicates between playlists removed.
+playlist with ID `yyyyyyyyyyyyyyyyyyyyyy`, with the duplicates between playlists removed, and then add songs from the
+playlist with ID `xxxxxxxxxxxxxxxxxxxxxx` until it reaches 100 (40 + 60) songs.
 
 #### More use cases
 
@@ -203,6 +206,77 @@ Example data file for this use case:
 
 Running the script with that data file would create a playlist named "My shuffled playlist", which would contain every
 song from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx`, but in a random order.
+
+### [create_year_based_mix](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/create_year_based_mix.py)
+
+This script creates a Spotify playlist with random tracks from an existing playlist, choosing the number of tracks based
+on their release date.
+
+It provides an alternative approach to **create_playlist_mix** script. Instead of creating a shuffled playlist from
+a certain number of songs from other playlists, it creates a new playlist from an existing one with certain number of
+songs within defined ranges of age.
+
+This way, you can easily generate a playlist, for example, from your liked songs, with a bunch of songs released in the
+last year and just a few that are older.
+
+The script takes one agrument: the path of a JSON file with the data of the playlists.
+
+Format of the data file:
+
+* **new_playlist_name (string):** name of the new playlist; set to null if update_playlist is set
+* **date_in_name (bool):** if true, append ` — <today's date>` at the end of the name of the playlist, with
+`<today's date>` the date of today in DD/MM/YY format.
+* **update_playlist (string):** if null, a new playlist is created; else, use the playlist with this ID (all its tracks
+  are removed first).
+* **user (string):** user ID (username)
+* **playlist_id (string):** ID of the playlist to take tracks from ("saved" for saved tracks)
+* **selection (list of object):** track selection by age (**AGE MUST BE IN ASCENDING ORDER AND THE LAST ONE MUST BE
+  NULL**)
+  * **age (number):** maximum age of the track (whole years since it was released)
+  * **count (number):** number of tracks to add
+
+Example data file:
+
+```json
+{
+    "new_playlist_name": null,
+    "date_in_name": null,
+    "update_playlist": "yyyyyyyyyyyyyyyyyyyyyy",
+    "user": "myuser2227",
+    "playlist_id": "xxxxxxxxxxxxxxxxxxxxxx",
+    "selection": [
+        {
+            "age": 1,
+            "count": 45
+        },
+        {
+            "age": 2,
+            "count": 25
+        },
+        {
+            "age": 4,
+            "count": 12
+        },
+        {
+            "age": 7,
+            "count": 8
+        },
+        {
+            "age": 11,
+            "count": 6
+        },
+        {
+            "age": null,
+            "count": 4
+        }
+    ]
+}
+```
+
+Running the script with that data file would replace all songs from the playlist with ID `yyyyyyyyyyyyyyyyyyyyyy` with
+45 randomly songs from the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx` and less than 1 year old, 25 songs between 1 and 2
+years old, 12 songs between 2 and 4 years old, 8 songs between 4 and 7 years old, 6 songs between 7 and 11 years old and
+4 songs older than 11 years.
 
 ### [copy_to_playlist](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/copy_to_playlist.py)
 

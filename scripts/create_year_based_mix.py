@@ -1,7 +1,7 @@
-# Script that creates a Spotify playlist with random tracks from other playlists
-# If there are duplicates in the resulting playlist, they are removed
+# Script that creates a Spotify playlist with random tracks from an existing playlist, choosing the number of tracks
+# based on their release date
 # Requires: spotipy
-# Usage: python create_playlist_mix.py data.json
+# Usage: python create_year_based_mix.py data.json
 # Set SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET environment variables
 # Set SPOTIPY_REDIRECT_URI environment variable (e. g. to http://localhost:9090)
 
@@ -11,11 +11,13 @@ import time
 import json
 import sys
 import common
+from datetime import date
+from dateutil.relativedelta import relativedelta
 from spotipy.oauth2 import SpotifyOAuth
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python create_playlist_mix.py data.json", file=sys.stderr)
+        print("Usage: python create_year_based_mix.py data.json", file=sys.stderr)
         exit(1)
 
     # Define needed scopes:
@@ -34,20 +36,20 @@ def main():
     #   <today's date> the date of today in DD/MM/YY format.
     # * update_playlist (string): if null, a new playlist is created; else, use the playlist with this ID (all its
     #   tracks are removed first).
-    # * filler_playlist_id (string): if null, playlist will be left as is after removing duplicates; else, complete it
-    #   with tracks from the playlist with this ID.
     # * user (string): user ID (username)
-    # * playlists (list of object): list of playlists
-    #   * playlist_id (string): ID of the playlist ("saved" for saved tracks)
-    #   * count (number): number of tracks to add from the playlist (if it is less than `0`, e.g. `-1`, add all tracks)
+    # * playlist_id (string): ID of the playlist to take tracks from ("saved" for saved tracks)
+    # * selection (list of object): track selection by age (AGE MUST BE IN ASCENDING ORDER AND THE LAST ONE MUST BE
+    #   NULL)
+    #   * age (number): maximum age of the track (whole years since it was released)
+    #   * count (number): number of tracks to add
     with open(sys.argv[1], 'r') as f:
         data = json.load(f)
 
     new_playlist_name = data['new_playlist_name']
-    user = data['user']
-    playlists = data['playlists']
     update_playlist = data['update_playlist']
-    filler_playlist_id = data['filler_playlist_id']
+    user = data['user']
+    playlist_id = data['playlist_id']
+    selection = data['selection']
 
     existing_playlist_song_ids = []  # List for the songs of the existing playlist
 
@@ -68,47 +70,49 @@ def main():
 
         # Iterate while getting items from the request
         while len(items) > 0:
-            for item in items:
-                existing_playlist_song_ids.append(item['track']['id'])  # Append the ID of the track
+            for collection in items:
+                existing_playlist_song_ids.append(collection['track']['id'])  # Append the ID of the track
 
             # Request next 100 items
             offset += 100
             items = sp.playlist_items(new_playlist_id, limit=100, offset=offset)['items']
 
     new_playlist_song_ids = []  # List for the songs of the new playlist
-    total_count = 0  # Eventually, number of songs that should be selected in total across all playlists
+    year_collections = dict()  # Dictionary to organize songs by age
 
-    # Iterate over the playlists
-    for playlist in playlists:
-        playlist_id = playlist['playlist_id']
-        count = playlist['count']
+    # Populate year_collections (key: maximum age; value: dict with count and a list of song IDs)
+    for collection in selection:
+        year_collections[str(collection['age'])] = dict(count = collection['count'], song_ids = [])
 
-        total_count += count
+    # Get list of tracks from playlist
+    tracks = common.get_tracks_from_playlist(sp, playlist_id)
 
-        # Add shuffled tracks to the list of songs of the new playlist
-        new_playlist_song_ids.extend(common.get_random_tracks_from_playlist(sp, playlist_id, count))
+    # Iterate over tracks
+    for track in tracks:
+        release_date = track['album']['release_date']  # Release date of the album
 
-    # Remove duplicates from the list of songs
-    new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
+        # If no hyphens in release date, it is just the year, so add July 1st (mid-year)
+        if '-' not in release_date:
+            release_date += "-07-01"
 
-    # If a filler playlist ID is specified, add random tracks from it
-    if filler_playlist_id is not None:
-        # Get all tracks from the filler playlist
-        filler_playlist_song_ids = []
+        # Get age of the track in whole years
+        age = relativedelta(date.today(), date.fromisoformat(release_date)).years
 
-        for song in common.get_tracks_from_playlist(sp, filler_playlist_id):
-            filler_playlist_song_ids.append(song['id'])
+        # Put track in its corresponding collection
+        for collection in selection:
+            threshold = collection['age']  # Maximum age for the tracks in the collection
 
-        # While the desired number of tracks has not been achieved and there are tracks remaining from filler playlist,
-        # keep adding new ones
-        while len(new_playlist_song_ids) < total_count and \
-            not all(elem in new_playlist_song_ids for elem in filler_playlist_song_ids):
-            # Number of tracks to take: difference between desired number and current number
-            count = total_count - len(new_playlist_song_ids)
+            if threshold is None or age < threshold:
+                year_collections[str(threshold)]['song_ids'].append(str(track['id']))
+                break
 
-            # Add newly selected tracks and remove duplicates
-            new_playlist_song_ids.extend(common.get_random_tracks_from_playlist(sp, filler_playlist_id, count))
-            new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
+    # Shuffle tracks and add count to list of songs
+    for collection in year_collections:
+        song_ids = year_collections[collection]['song_ids']
+        count = year_collections[collection]['count']
+
+        random.shuffle(song_ids)
+        new_playlist_song_ids.extend(song_ids[:count])
 
     # Shuffle list of songs
     random.shuffle(new_playlist_song_ids)

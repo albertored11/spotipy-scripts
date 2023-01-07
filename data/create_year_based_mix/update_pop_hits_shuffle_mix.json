@@ -1,0 +1,33 @@
+{
+    "new_playlist_name": null,
+    "date_in_name": null,
+    "update_playlist": "",
+    "user": "",
+    "playlist_id": "",
+    "selection": [
+        {
+            "age": 1,
+            "count": 45
+        },
+        {
+            "age": 2,
+            "count": 25
+        },
+        {
+            "age": 4,
+            "count": 12
+        },
+        {
+            "age": 7,
+            "count": 8
+        },
+        {
+            "age": 11,
+            "count": 6
+        },
+        {
+            "age": null,
+            "count": 4
+        }
+    ]
+}
