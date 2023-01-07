@@ -10,57 +10,8 @@ import random
 import time
 import json
 import sys
+import common
 from spotipy.oauth2 import SpotifyOAuth
-
-def get_tracks_from_playlist(sp, playlist_id):
-    """
-    Given a spotipy Spotify instance and a playlist ID, returns a list containing every track in that playlist.
-    """
-
-    offset = 0  # Keep an offset bc requests have a 50/100 track limit
-    songs = []  # List for the songs from the playlist
-
-    # If playlist_id is "saved", request saved tracks; otherwise, request tracks from the corresponding playlist
-    if playlist_id == "saved":
-        items = sp.current_user_saved_tracks(limit=50)['items']  # Max limit for saved tracks = 50
-    else:
-        items = sp.playlist_items(playlist_id, limit=100)['items']  # Max limit for playlists = 100
-
-    # Iterate while getting items from the request
-    while len(items) > 0:
-        for item in items:
-            songs.append(item['track'])  # Append track
-
-        # Request next 50/100 items
-        if playlist_id == "saved":
-            offset += 50
-            items = sp.current_user_saved_tracks(limit=50, offset=offset)['items']
-        else:
-            offset += 100
-            items = sp.playlist_items(playlist_id, limit=100, offset=offset)['items']
-
-    # Return list with all songs
-    return songs
-
-def get_random_tracks_from_playlist(sp, playlist_id, count):
-    """
-    Given a spotipy Spotify instance, a playlist ID and a number, returns a list containing that number of IDs of
-    randomly selected tracks from that playlist.
-    """
-
-    song_ids = []
-
-    for song in get_tracks_from_playlist(sp, playlist_id):
-        song_ids.append(song['id'])
-
-    # TODO: this does not work with saved songs
-    # If count < 0, use all songs
-    if count < 0:
-        count = sp.playlist(playlist_id)['tracks']['total']  # Get number of songs
-
-    # Shuffle tracks, take count and return them
-    random.shuffle(song_ids)
-    return song_ids[:count]
 
 def main():
     if len(sys.argv) < 2:
@@ -78,7 +29,7 @@ def main():
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
     # Load data from JSON file. Format:
-    # * new_playlist_name (string): name of the new playlist (leave blank for default)
+    # * new_playlist_name (string): name of the new playlist; set to null if update_playlist is set
     # * date_in_name (bool): if true, append — <today's date> at the end of the name of the playlist, with
     #   <today's date> the date of today in DD/MM/YY format.
     # * update_playlist (string): if null, a new playlist is created; else, use the playlist with this ID (all its
@@ -133,7 +84,7 @@ def main():
         total_count += count
 
         # Add shuffled tracks to the list of songs of the new playlist
-        new_playlist_song_ids.extend(get_random_tracks_from_playlist(sp, playlist_id, count))
+        new_playlist_song_ids.extend(common.get_random_tracks_from_playlist(sp, playlist_id, count))
 
     # Remove duplicates from the list of songs
     new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
@@ -143,7 +94,7 @@ def main():
         # Get all tracks from the filler playlist
         filler_playlist_song_ids = []
 
-        for song in get_tracks_from_playlist(sp, filler_playlist_id):
+        for song in common.get_tracks_from_playlist(sp, filler_playlist_id):
             filler_playlist_song_ids.append(song['id'])
 
         # While the desired number of tracks has not been achieved and there are tracks remaining from filler playlist,
@@ -154,7 +105,7 @@ def main():
             count = total_count - len(new_playlist_song_ids)
 
             # Add newly selected tracks and remove duplicates
-            new_playlist_song_ids.extend(get_random_tracks_from_playlist(sp, filler_playlist_id, count))
+            new_playlist_song_ids.extend(common.get_random_tracks_from_playlist(sp, filler_playlist_id, count))
             new_playlist_song_ids = list(dict.fromkeys(new_playlist_song_ids))
 
     # Shuffle list of songs
