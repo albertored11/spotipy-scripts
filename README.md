@@ -278,6 +278,43 @@ Running the script with that data file would replace all songs from the playlist
 years old, 12 songs between 2 and 4 years old, 8 songs between 4 and 7 years old, 6 songs between 7 and 11 years old and
 4 songs older than 11 years.
 
+### [latest_music](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/latest_music.py)
+
+This script keeps songs from a playlist that doesn't exceed a maximum age in another playlist.
+
+This way, you can have a playlist with songs from your liked songs, but just ones that were released in the last 12
+months, so it only has the latest music.
+
+Songs are sorted in descending order (most recent first). Everytime a song is added, it is placed so this order is
+preserved. This assumes the user never manually reorders the songs in the playlist.
+
+Everytime the script is run, new songs that match the age requirements are added, and those that doesn't anymore are
+removed. 
+
+The script takes one agrument: the path of a JSON file with the data of the playlists.
+
+Format of the data file:
+
+* **update_playlist (string):** save tracks in the playlist with this ID
+* **user (string):** user ID (username)
+* **playlist_id (string):** ID of the playlist to take tracks from ("saved" for saved tracks)
+* **max_months (number):** maximum age (in months) of the track (whole months since it was released)
+
+Example data file:
+
+```json
+{
+    "update_playlist": "xxxxxxxxxxxxxxxxxxxxxx",
+    "user": "myuser2227",
+    "playlist_id": "saved",
+    "max_months": 12
+}
+```
+
+Running the script with that data file would add all liked songs released in the last 12 months to the playlist with ID
+`xxxxxxxxxxxxxxxxxxxxxx`, in descending order, and remove those in that playlist that were relased more than 12 months
+ago. Existing songs wouldn't be readded.
+
 ### [copy_to_playlist](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/copy_to_playlist.py)
 
 This script takes the tracks from a playlist and appends them to the end of a different, existing playlist, avoiding
