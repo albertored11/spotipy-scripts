@@ -1,4 +1,5 @@
 import random
+import csv
 
 def get_tracks_from_playlist(sp, playlist_id):
     """
@@ -49,3 +50,38 @@ def get_random_tracks_from_playlist(sp, playlist_id, count):
     # Shuffle tracks, take count and return them
     random.shuffle(song_ids)
     return song_ids[:count]
+
+def actual_track_release_date(sp, track, rd_cache_file):
+    """
+    Given a spotipy Spotify instance, a track object and the path to a cache file, returns the actual release date of
+    the track; this is, the release date of the album, single... where it first appeared
+    """
+    # Open cache file for reading
+    with open(rd_cache_file, "r") as f:
+        reader = csv.reader(f)  # Create CSV reader
+
+        isrc = track['external_ids']['isrc']  # Get track ISRC
+
+        # Find ISRC in the cache file and return release date if found
+        for row in reader:
+            if row[0] == isrc:
+                return row[1]
+
+    # If ISRC wasn't found, open cache file for appending to add it
+    with open(rd_cache_file, "a") as f:
+        writer = csv.writer(f)  # Create CSV writer
+
+        track_rd = track['album']['release_date']  # Release date of the album associated to the track
+        releases = sp.search("isrc:" + isrc)['tracks']['items']  # Find all releases of the track using its ISRC
+        release_dates = [release['album']['release_date'] for release in releases]  # List of all release dates
+
+        # If the list release dates is not empty, take the older one; else, use track_rd
+        if release_dates:
+            rd = min(release_dates)
+        else:
+            rd = track_rd
+
+        # Save ISRC and release date to the cache file
+        writer.writerow([isrc, rd])
+
+        return rd

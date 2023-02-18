@@ -1,7 +1,7 @@
 # Script that creates a Spotify playlist with random tracks from an existing playlist, choosing the number of tracks
 # based on their release date
 # Requires: spotipy
-# Usage: python create_year_based_mix.py data.json
+# Usage: python create_year_based_mix.py data.json rd_cache.csv
 # Set SPOTIPY_CLIENT_ID and SPOTIPY_CLIENT_SECRET environment variables
 # Set SPOTIPY_REDIRECT_URI environment variable (e. g. to http://localhost:9090)
 
@@ -10,14 +10,15 @@ import random
 import time
 import json
 import sys
+import os
 import common
 from datetime import date
 from dateutil.relativedelta import relativedelta
 from spotipy.oauth2 import SpotifyOAuth
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python create_year_based_mix.py data.json", file=sys.stderr)
+    if len(sys.argv) < 3:
+        print("Usage: python create_year_based_mix.py data.json rd_cache.csv", file=sys.stderr)
         exit(1)
 
     # Define needed scopes:
@@ -50,6 +51,12 @@ def main():
     user = data['user']
     playlist_id = data['playlist_id']
     selection = data['selection']
+
+    rd_cache_file = sys.argv[2]
+
+    # Create cache file if it does not exist
+    if not os.path.exists(rd_cache_file):
+        os.mknod(rd_cache_file)
 
     existing_playlist_song_ids = []  # List for the songs of the existing playlist
 
@@ -89,7 +96,7 @@ def main():
 
     # Iterate over tracks
     for track in tracks:
-        release_date = track['album']['release_date']  # Release date of the album
+        release_date = common.actual_track_release_date(sp, track, rd_cache_file)  # Release date
 
         # If no hyphens in release date, it is just the year, so add July 1st (mid-year)
         if '-' not in release_date:
