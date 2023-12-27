@@ -28,7 +28,7 @@ def main():
     scope = "playlist-read-collaborative playlist-read-private playlist-modify-private user-library-read"
 
     # Set up auth using Authorization Code Flow
-    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
+    sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, open_browser=False))
 
     # Load data from JSON file. Format:
     # * new_playlist_name (string): name of the new playlist; set to null if update_playlist is set
