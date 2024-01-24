@@ -90,10 +90,14 @@ def main():
     # Iterate over tracks
     for track in tracks:
         release_date = track['album']['release_date']  # Release date of the album
+        release_date_precision = track['album']['release_date_precision'] # Precision of the release date (day or year)
 
-        # If no hyphens in release date, it is just the year, so add July 1st (mid-year)
-        if '-' not in release_date:
-            release_date += "-07-01"
+        if release_date == "0000":
+            continue
+
+        # If no hyphens in release date, it is just the year, so add January 1st
+        if release_date_precision == "year":
+            release_date += "-01-01"
 
         # Get age of the track in whole years
         age = relativedelta(date.today(), date.fromisoformat(release_date)).years
