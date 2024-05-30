@@ -330,7 +330,7 @@ listen to them later.
 The playlist IDs (source and destination) are read from the first and the second program arguments, respectively:
 
 ```bash
-python scripts/get_playlist_tracks.py <source_playlist_id> <dest_playlist_id>
+python scripts/copy_to_playlist.py <source_playlist_id> <dest_playlist_id>
 ```
 
 Running the script would append the tracks from the playlist with ID `<source_playlist_id>` to the end of the playlist
@@ -343,3 +343,21 @@ the script once a week.
 
 My choice is using a [systemd timer](https://wiki.archlinux.org/title/Systemd/Timers) to run the script every friday at
 12:00, but a cron job should also do the work.
+
+### [copy_saved_to_playlist](blob/main/scripts/copy_saved_to_playlist.py)
+
+This script takes the tracks from the Liked Songs playlist and appends them to the end of a different, existing 
+playlist, avoiding duplicates.
+
+The reason I wrote this script is that the Spotify mobile app seems to slow down and malfunction when the Liked
+Songs list becomes very large. This script allows me to copy that Liked Songs list over to an archive list and 
+remove a few thousand songs from the Liked list, making my experience in the app significantly better. 
+
+The playlist ID (destination) is read from the first program argument:
+
+```bash
+python scripts/copy_saved_to_playlist.py <dest_playlist_id>
+```
+
+Running the script would append the tracks from the playlist with ID `<source_playlist_id>` to the end of the playlist
+with ID `<dest_playlist_id>`, excepting the ones that already existed in the latter.
