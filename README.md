@@ -65,7 +65,7 @@ This script prints all tracks from a Spotify playlist. It supports playlists wit
 limit (100 songs), making multiple requests.
 
 In the first line, it shows the name of the playlist and the number of songs. Then, after a blank line, it shows one
-song per line, with the list of artists sepparated with commas and the name of the song.
+song per line, with the list of artists separated with commas and the name of the song.
 
 This is the first script I wrote as I started tinkering with spotipy, and it probably doesn't have much practical use.
 
@@ -92,6 +92,8 @@ Tchami, Marten Hørger — The Calling
 Alok, Bastille — Run Into Trouble
 Jax Jones, Martin Solveig, GRACEY, Europa — Lonely Heart
 ```
+
+Instead of a playlist id you can pass `saved` to get your Liked Songs list. 
 
 ### [create_playlist_mix](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/create_playlist_mix.py)
 
