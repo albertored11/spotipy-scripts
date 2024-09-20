@@ -35,10 +35,10 @@ virtualenv venv
 source venv/bin/activate # for bash/zsh
 ```
 
-Then install spotipy:
+Then install dependencies:
 
 ```bash
-pip install spotipy
+pip install -r requirements.txt
 ```
 
 Now, some environment variables need to be defined to access the API through spotipy:
