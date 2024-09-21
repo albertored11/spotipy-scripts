@@ -22,8 +22,9 @@ def main():
     # * playlist-read-collaborative: to get tracks from collab playlists
     # * playlist-read-private: to get tracks from private playlists
     # * playlist-modify-private: to create the playlist and add tracks to it
+    # * playlist-modify-public: to create the playlist and add tracks to it
     # * user-library-read: to get tracks from library (liked songs)
-    scope = "playlist-read-collaborative playlist-read-private playlist-modify-private user-library-read"
+    scope = "playlist-read-collaborative playlist-read-private playlist-modify-private playlist-modify-public user-library-read"
 
     # Set up auth using Authorization Code Flow
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))

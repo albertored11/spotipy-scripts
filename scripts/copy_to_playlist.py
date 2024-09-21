@@ -16,7 +16,8 @@ if len(sys.argv) < 2:
 # * playlist-read-collaborative: to get tracks from collab playlists
 # * playlist-read-private: to get tracks from private playlists
 # * playlist-modify-private: to create the playlist and add tracks to it
-scope = "playlist-read-collaborative playlist-read-private playlist-modify-private"
+# * playlist-modify-public: to create the playlist and add tracks to it
+scope = "playlist-read-collaborative playlist-read-private playlist-modify-private playlist-modify-public"
 
 # Set up auth using Authorization Code Flow
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
