@@ -13,13 +13,14 @@ from dateutil.relativedelta import relativedelta
 from spotipy.oauth2 import SpotifyOAuth
 
 # Get age in months from a date
-def age_in_months(release_date):
-    # If no hyphens in release date, it is just the year, so add July 1st (mid-year)
-    if '-' not in release_date:
-        release_date += "-07-01"
+def age_in_months(release_date, release_date_precision):
+    # If precision is year, add January 1st
+    if release_date_precision == "year":
+        release_date += "-01-01"
 
     # Get age of the track in whole months
     age = relativedelta(date.today(), date.fromisoformat(release_date))
+
     return age.months + 12 * age.years
 
 def main():
@@ -31,8 +32,9 @@ def main():
     # * playlist-read-collaborative: to get tracks from collab playlists
     # * playlist-read-private: to get tracks from private playlists
     # * playlist-modify-private: to add tracks to the playlist
+    # * playlist-modify-public: to add tracks to the playlist
     # * user-library-read: to get tracks from library (liked songs)
-    scope = "playlist-read-collaborative playlist-read-private playlist-modify-private user-library-read"
+    scope = "playlist-read-collaborative playlist-read-private playlist-modify-private playlist-modify-public user-library-read"
 
     # Set up auth using Authorization Code Flow
     sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope, open_browser=False))
@@ -53,14 +55,20 @@ def main():
     source_playlist_tracks = common.get_tracks_from_playlist(sp, playlist_id)
     target_playlist_tracks = common.get_tracks_from_playlist(sp, update_playlist)
 
-    # Track IDs in the target playlist
+    # Track IDs in the source and the target playlists
+    source_playlist_track_ids = [t['id'] for t in source_playlist_tracks]
     target_playlist_track_ids = [t['id'] for t in target_playlist_tracks]
 
     # For every track in the source playlist, check if it already is in the target playlist
     for track in source_playlist_tracks:
         if track['id'] not in target_playlist_track_ids:
             release_date = track['album']['release_date']
-            months = age_in_months(release_date)
+            release_date_precision = track['album']['release_date_precision'] # Precision of the release date (day or year)
+
+            if release_date == "0000":
+                continue
+
+            months = age_in_months(release_date, release_date_precision)
 
             # Add track if it doesn't exceed maximum age
             if months < max_months:
@@ -81,10 +89,15 @@ def main():
     # For every track in the target playlist
     for track in target_playlist_tracks:
         release_date = track['album']['release_date']
-        months = age_in_months(release_date)
+        release_date_precision = track['album']['release_date_precision'] # Precision of the release date (day or year)
 
-        # Remove track if it exceeds maximum age now
-        if months >= max_months:
+        if release_date == "0000":
+            continue
+
+        months = age_in_months(release_date, release_date_precision)
+
+        # Remove track if it exceeds maximum age now or if it isn't in the source playlist anymore
+        if months >= max_months or track['id'] not in source_playlist_track_ids:
             sp.playlist_remove_all_occurrences_of_items(update_playlist, [track['id']])
 
 if __name__ == '__main__':
