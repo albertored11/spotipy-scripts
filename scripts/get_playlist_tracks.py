@@ -44,13 +44,13 @@ else:
     print(playlist['name'] + " — " + str(track_total) + " tracks\n")
 
 offset = 0  # Keep an offset bc requests have a 100 track limit
-
+count = 0
 # Iterate while getting items from the request
 while len(items) > 0:
     for item in items:
         track = item['track']
         artists = track['artists']
-
+        count += 1
         # If just one artist, print its name
         if len(artists) == 1:
             print(artists[0]['name'] + " — ", end="")
@@ -71,3 +71,6 @@ while len(items) > 0:
     else:
         offset += 100
         items = sp.playlist_items(playlist_id, limit=100, offset=offset)['items']
+
+
+print(count);
