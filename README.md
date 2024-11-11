@@ -341,3 +341,37 @@ the script once a week.
 
 My choice is using a [systemd timer](https://wiki.archlinux.org/title/Systemd/Timers) to run the script every friday at
 12:00, but a cron job should also do the work.
+
+### [update_playlist_with_new_music](https://github.com/albertored11/spotipy-scripts/blob/main/scripts/update_playlist_with_new_music.py)
+
+This script takes the tracks from a list of playlists and appends them to the end of two existing playlists, only if they are not in the "history" playlist, which is one of those two.
+
+I wrote this script to save all the new songs from Top 50 weekly charts to another playlist so I'm sure I'm not missing any.
+
+Playlist are designed to work the following way:
+
+* **New music:** all songs from a collection of regularly updated playlists (e.g. Top 50 weekly charts) that **are not present** in the **[HISTORY] New music** playlist are added to this one. When a song is removed from this playlist, it is not added again ever as long as it is also present in the history playlist.
+* **[HISTORY] New music:** all songs added to the **New music** playlist are also added to this one, but they should never be removed from it.
+
+The script takes one agrument: the path of a JSON file with the data of the playlists.
+
+Format of the data file:
+
+* **target_playlist_id (string):** ID of the playlist to add the tracks to
+* **history_playlist_id (string):** ID of the playlist where the history of tracks added to target playlist is kept
+* **source_playlsit_ids (list of string):** list of IDs of playlists to get new tracks from
+
+Example data file:
+
+```json
+{
+  "target_playlist_id": "xxxxxxxxxxxxxxxxxxxxxx",
+  "history_playlist_id": "yyyyyyyyyyyyyyyyyyyyyy",
+  "source_playlist_ids": [
+    "1111111111111111111111",
+    "2222222222222222222222"
+  ]
+}
+```
+
+Running the script with that data file would add all songs from playlists with IDs `1111111111111111111111` and `2222222222222222222222` that are not in the playlist with ID `yyyyyyyyyyyyyyyyyyyyyy` to the playlist with ID `xxxxxxxxxxxxxxxxxxxxxx` and also to the playlist with ID `yyyyyyyyyyyyyyyyyyyyyy`.

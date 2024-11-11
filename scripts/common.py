@@ -49,3 +49,32 @@ def get_random_tracks_from_playlist(sp, playlist_id, count):
     # Shuffle tracks, take count and return them
     random.shuffle(song_ids)
     return song_ids[:count]
+
+def get_oldest_track_id(sp, track_id):
+    isrc = sp.track(track_id)['external_ids']['isrc']  # Get ISRC from track
+
+    all_tracks = []  # List for all the tracks with this ISRC
+    offset = 0  # Keep an offset bc requests have a 50 track limit
+
+    tracks = sp.search(f"isrc:{isrc}", limit=50)['tracks']['items']  # Max limit for search = 50
+
+    # Iterate while getting items from the request
+    while len(tracks) > 0:
+        for track in tracks:
+            all_tracks.append(track)  # Append the track
+
+        # Request next 50 items
+        offset += 50
+        tracks = sp.search(f"isrc:{isrc}", limit=50, offset=offset)['tracks']['items']
+
+    # Check if search results are not empty
+    if len(all_tracks) > 0:
+        # Sort tracks by album release date and choose oldest
+        sorted_tracks = sorted(all_tracks, key = lambda x : x['album']['release_date'])
+        oldest_track_id = sorted_tracks[0]['id']
+    else:
+        # Use the same track ID
+        oldest_track_id = track_id
+
+    # Return ID of the track with the oldest album release date
+    return oldest_track_id
